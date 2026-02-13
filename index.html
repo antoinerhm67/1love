@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pour Toi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #2c1810 0%, #4a2c1f 50%, #2c1810 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #f5e6d3;
+        }
+
+        /* Animation d'enveloppe */
+        .envelope-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            background: linear-gradient(135deg, #2c1810 0%, #4a2c1f 50%, #2c1810 100%);
+            transition: opacity 0.5s ease;
+        }
+
+        .envelope-wrapper.opening {
+            pointer-events: none;
+        }
+
+        .envelope-wrapper.opened {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .envelope {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-wrapper.opening .envelope {
+            cursor: default;
+        }
+
+        .envelope-wrapper.opening .envelope:hover {
+            transform: scale(1);
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d4a574;
+            font-size: 1.1em;
+            font-style: italic;
+            text-align: center;
+            animation: pulse 2s ease-in-out infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .envelope-wrapper.opening .click-hint,
+        .envelope-wrapper.opened .click-hint {
+            display: none;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid #8b3a3a;
+            transform-origin: top center;
+            z-index: 3;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper.opening .envelope-flap {
+            animation: openFlap 1s ease forwards;
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 300px;
+            height: 120px;
+            background: linear-gradient(135deg, #6b2c2c, #8b3a3a);
+            z-index: 1;
+            border: 2px solid #5a2020;
+        }
+
+        .envelope-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-bottom: 80px solid #6b2c2c;
+        }
+
+        .letter {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 260px;
+            height: 160px;
+            background: linear-gradient(to bottom, #f5e6d3, #e5d4c1);
+            border: 2px solid #d4a574;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .envelope-wrapper.opening .letter {
+            animation: pullOutLetter 1s ease 0.5s forwards;
+        }
+
+        /* Rose sur l'enveloppe */
+        .rose {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+
+        .rose-stem {
+            position: absolute;
+            width: 4px;
+            height: 80px;
+            background: linear-gradient(to bottom, #2d5016, #1a3d0a);
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .rose-leaf {
+            position: absolute;
+            width: 20px;
+            height: 12px;
+            background: #2d5016;
+            border-radius: 0 50% 50% 0;
+            bottom: -15px;
+        }
+
+        .rose-leaf.left {
+            left: -18px;
+            transform: rotate(-30deg);
+        }
+
+        .rose-leaf.right {
+            right: -18px;
+            transform: rotate(30deg) scaleX(-1);
+        }
+
+        .rose-flower {
+            position: relative;
+            width: 50px;
+            height: 50px;
+        }
+
+        .rose-petal {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(ellipse at center, #8b2c2c, #6b1f1f);
+            border-radius: 50% 50% 0 50%;
+            transform-origin: bottom right;
+        }
+
+        .rose-petal:nth-child(1) {
+            transform: rotate(0deg) translate(-5px, -5px);
+        }
+
+        .rose-petal:nth-child(2) {
+            transform: rotate(72deg) translate(-5px, -5px);
+        }
+
+        .rose-petal:nth-child(3) {
+            transform: rotate(144deg) translate(-5px, -5px);
+        }
+
+        .rose-petal:nth-child(4) {
+            transform: rotate(216deg) translate(-5px, -5px);
+        }
+
+        .rose-petal:nth-child(5) {
+            transform: rotate(288deg) translate(-5px, -5px);
+        }
+
+        .rose-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #a83a3a, #6b1f1f);
+            border-radius: 50%;
+        }
+
+        @keyframes openFlap {
+            0% {
+                transform: rotateX(0deg);
+            }
+            100% {
+                transform: rotateX(-180deg);
+            }
+        }
+
+        @keyframes pullOutLetter {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: linear-gradient(to bottom, #3d2517, #2a1810);
+            border: 2px solid #8b5a3c;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .container.visible {
+            opacity: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(107, 44, 44, 0.3), rgba(139, 58, 58, 0.2));
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(139, 90, 60, 0.3);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 90, 60, 0.1) 2px,
+                    rgba(139, 90, 60, 0.1) 4px
+                );
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #f5e6d3;
+            margin-bottom: 10px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            color: #d4b896;
+            font-style: italic;
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.2s; }
+        .section:nth-child(2) { animation-delay: 0.3s; }
+        .section:nth-child(3) { animation-delay: 0.4s; }
+        .section:nth-child(4) { animation-delay: 0.5s; }
+        .section:nth-child(5) { animation-delay: 0.6s; }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #c9896b;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #6b2c2c;
+            display: block;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .section-content {
+            line-height: 1.8;
+            color: #e5d4c1;
+            font-size: 1.1em;
+        }
+
+        .section-content p {
+            margin-bottom: 15px;
+        }
+
+        .highlight {
+            color: #d4a574;
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #8b5a3c, transparent);
+            margin: 40px 0;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, rgba(107, 44, 44, 0.3), rgba(139, 58, 58, 0.2));
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid rgba(139, 90, 60, 0.3);
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 90, 60, 0.1) 2px,
+                    rgba(139, 90, 60, 0.1) 4px
+                );
+            pointer-events: none;
+        }
+
+        .footer p {
+            color: #f5e6d3;
+            font-size: 1.2em;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .signature {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #d4a574;
+            font-family: 'Brush Script MT', cursive;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .section-title {
+                font-size: 1.5em;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="envelope-wrapper" id="envelopeWrapper">
+        <div class="envelope" id="envelope">
+            <div class="envelope-flap"></div>
+            <div class="letter"></div>
+            <div class="envelope-body"></div>
+            <div class="rose">
+                <div class="rose-flower">
+                    <div class="rose-petal"></div>
+                    <div class="rose-petal"></div>
+                    <div class="rose-petal"></div>
+                    <div class="rose-petal"></div>
+                    <div class="rose-petal"></div>
+                    <div class="rose-center"></div>
+                </div>
+                <div class="rose-stem">
+                    <div class="rose-leaf left"></div>
+                    <div class="rose-leaf right"></div>
+                </div>
+            </div>
+            <div class="click-hint">Clique pour ouvrir 💌</div>
+        </div>
+    </div>
+    
+    <div class="container" id="container">
+        <div class="header">
+            <h1>Pour Toi</h1>
+            <p>Une carte différente, pour une Saint-Valentin sincère</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">Amuse-Bouche · Les Fondations</h2>
+                <div class="section-content">
+                    <p>Je ne vais pas te servir des mots sucrés ou des promesses parfaites. Ce que je veux te dire, c'est que <span class="highlight">l'amour, le vrai, n'est pas toujours rose</span>. Il est fait de moments difficiles, de malentendus, de silences parfois lourds.</p>
+                    <p>Mais c'est justement dans ces moments-là qu'on apprend à se connaître vraiment.</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section">
+                <h2 class="section-title">Entrée · Le Chemin Parcouru</h2>
+                <div class="section-content">
+                    <p>Je sais qu'on a eu nos disputes, nos incompréhensions. Je ne vais pas prétendre que tout était de ma faute, ni que tout était de la tienne. Mais ce que je sais, c'est que <span class="highlight">je choisis de construire avec toi</span> plutôt que de m'accrocher à ce qui nous a séparés.</p>
+                    <p>Se réconcilier, ce n'est pas effacer le passé. C'est accepter qu'on est deux êtres imparfaits qui essaient de faire mieux, ensemble.</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section">
+                <h2 class="section-title">Plat · Mon Engagement</h2>
+                <div class="section-content">
+                    <p>J'ai appris que pour aimer quelqu'un, il faut d'abord <span class="highlight">apprendre à se gérer soi-même</span>. Mes angoisses, mes doutes, mes mauvais jours — ce n'est pas ton rôle de tout porter.</p>
+                    <p>Je travaille sur moi, pas pour devenir parfait, mais pour être meilleur à tes côtés. Pour que notre relation soit un espace de complicité, pas un terrain de tensions.</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section">
+                <h2 class="section-title">Accompagnement · Ce Que Tu Représentes</h2>
+                <div class="section-content">
+                    <p>Tu n'es pas juste "ma copine". Tu es <span class="highlight">la personne qui me fait oublier les mauvaises pensées quand je broie du noir</span>, celle qui comprend mes silences, celle avec qui les journées ont du sens.</p>
+                    <p>Tu es celle qui me pousse à être meilleur sans jamais me juger pour mes faiblesses. Celle dont le sourire, même après une journée de merde, rend tout plus léger.</p>
+                    <p>Je ne te promets pas la perfection. Je te promets <span class="highlight">d'être présent, d'être honnête, et de me battre pour nous</span> quand les choses deviennent compliquées.</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section">
+                <h2 class="section-title">Dessert · L'Évidence</h2>
+                <div class="section-content">
+                    <p>Au final, ce que je veux te dire, c'est simple : <span class="highlight">je t'aime</span>. Pas de cet amour théâtral qu'on voit dans tes films et séries. Mais de cet amour qui fait que, quand je pense à demain, je te vois dedans.</p>
+                    <p>Cet amour qui fait que tes petites manies m'attendrissent, que tes défauts ne me dérangent pas, que ton bien-être compte autant que le mien.</p>
+                    <p>Cette Saint-Valentin, je ne t'offre pas des illusions. Je t'offre ma présence, mon engagement, et la promesse de faire les efforts nécessaires pour que nous deux, ça dure. Parce que <span class="highlight">je t'aime</span>.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Pas besoin de grand discours,<br>juste toi et moi</p>
+            <div class="signature">Avec tout mon cœur</div>
+        </div>
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const envelopeWrapper = document.getElementById('envelopeWrapper');
+        const container = document.getElementById('container');
+
+        // Bloquer le scroll initial
+        document.body.style.overflow = 'hidden';
+
+        envelope.addEventListener('click', function() {
+            // Ajouter la classe pour déclencher l'animation
+            envelopeWrapper.classList.add('opening');
+            
+            // Après 1.5s, faire disparaître l'enveloppe et afficher le contenu
+            setTimeout(function() {
+                envelopeWrapper.classList.add('opened');
+                container.classList.add('visible');
+                // Réactiver le scroll
+                document.body.style.overflow = 'auto';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
